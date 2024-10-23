@@ -1,5 +1,7 @@
 ## nomadex-client
 
+Client library to programmatically interact with https://voi.nomadex.app
+
 ### Install 
 
 ```shell

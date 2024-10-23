@@ -1,13 +1,17 @@
 {
   "name": "nomadex-client",
-  "version": "0.0.6",
-  "description": "",
+  "version": "0.0.7",
+  "description": "Client library to programmatically interact with https://voi.nomadex.app",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "browser": {
     "crypto": false,
     "path": false,
     "fs": false
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NomadexApp/nomadex-client.git"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
@@ -18,8 +22,20 @@
     "lib",
     "README.md"
   ],
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "algorand",
+    "voi",
+    "avm",
+    "blockchain",
+    "nomadex",
+    "nomadex.app",
+    "client",
+    "contracts"
+  ],
+  "author": {
+    "name": "webdev.algo",
+    "email": "webdevalgo@gmail.com"
+  },
   "license": "ISC",
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^6.2.1"
