@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "test": "npm run build"
   },
   "files": [
     "dist",
