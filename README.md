@@ -6,6 +6,8 @@ Client library to programmatically interact with https://voi.nomadex.app
 
 ```shell
 npm i -d nomadex-client
+yarn add -d nomadex-client
+bun add -D nomadex-client
 ```
 
 ### Swap
