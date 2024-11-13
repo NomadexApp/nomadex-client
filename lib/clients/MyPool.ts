@@ -1,13 +1,28 @@
-import { ABIType, AtomicTransactionComposer, getApplicationAddress, makeAssetTransferTxnWithSuggestedParamsFromObject, makeEmptyTransactionSigner, makePaymentTxnWithSuggestedParamsFromObject, Transaction, waitForConfirmation, type Algodv2, type TransactionSigner } from "algosdk";
-import { PoolClient } from './PoolClient'
-import type { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account";
-import { MySmartAsset } from "./MySmartAsset";
-import { SmartAssetClient } from "./SmartAssetClient";
-import { contracts } from "../constants";
-import { populateAppCallResources } from "@algorandfoundation/algokit-utils";
+import {
+    ABIType,
+    AtomicTransactionComposer,
+    getApplicationAddress,
+    makeAssetTransferTxnWithSuggestedParamsFromObject,
+    makeEmptyTransactionSigner,
+    makePaymentTxnWithSuggestedParamsFromObject,
+    Transaction,
+    waitForConfirmation,
+    type Algodv2,
+    type TransactionSigner,
+} from 'algosdk';
+import { PoolClient } from './PoolClient';
+import type { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account';
+import { MySmartAsset } from './MySmartAsset';
+import { SmartAssetClient } from './SmartAssetClient';
+import { contracts } from '../constants';
+import { populateAppCallResources } from '@algorandfoundation/algokit-utils';
 
-export enum TokenType { ALGO = 0, ASA = 1, SMART = 2 };
-type Token = { id: number, type: TokenType };
+export enum TokenType {
+    ALGO = 0,
+    ASA = 1,
+    SMART = 2,
+}
+type Token = { id: number; type: TokenType };
 
 export class MyPool extends MySmartAsset {
     id: number;
@@ -25,7 +40,7 @@ export class MyPool extends MySmartAsset {
                 resolveBy: 'id',
                 sender: signer ?? {
                     addr: 'DYX2V5XF4IKOHE55Z63XAHVBJTMYM723HK5WJZ72BDZ5AFEFKJ5YP4DOQQ',
-                    signer: makeEmptyTransactionSigner()
+                    signer: makeEmptyTransactionSigner(),
                 },
             },
             nodeClient
@@ -65,7 +80,12 @@ export class MyPool extends MySmartAsset {
                     to: getApplicationAddress(this.id),
                     value: amount,
                 },
-                { sendParams: { populateAppCallResources: true, skipSending: true } }
+                {
+                    sendParams: {
+                        populateAppCallResources: true,
+                        skipSending: true,
+                    },
+                }
             );
             return transaction;
         }
@@ -83,8 +103,8 @@ export class MyPool extends MySmartAsset {
                 if (typeof info?.['asset-holding']?.amount !== 'undefined') isOptedIn = true;
             } catch (e: unknown) {
                 if (e) {
-                    // 
-                };
+                    //
+                }
             }
 
             if (!isOptedIn) {
@@ -121,7 +141,8 @@ export class MyPool extends MySmartAsset {
                         amount: 28500,
                         suggestedParams: params,
                     }),
-                    (await client.arc200Transfer({ to: address, value: 0 }, { sendParams: { skipSending: true } })).transaction,
+                    (await client.arc200Transfer({ to: address, value: 0 }, { sendParams: { skipSending: true } }))
+                        .transaction,
                 ];
             };
             if (factoryBalance < 1n) {
@@ -134,12 +155,28 @@ export class MyPool extends MySmartAsset {
         return txns;
     }
 
-    private async addLiquidityHandler(tokenA: Token, tokenB: Token, assetAAmount: bigint, assetBAmount: bigint, send: boolean) {
-        const opts = { id: this.id, resolveBy: 'id' as const, sender: { ...this.signer } };
+    private async addLiquidityHandler(
+        tokenA: Token,
+        tokenB: Token,
+        assetAAmount: bigint,
+        assetBAmount: bigint,
+        send: boolean,
+        populate: boolean
+    ) {
+        const opts = {
+            id: this.id,
+            resolveBy: 'id' as const,
+            sender: { ...this.signer },
+        };
         const alphaTxn = await this.buildDepositTxn(tokenA, assetAAmount);
         const betaTxn = await this.buildDepositTxn(tokenB, assetBAmount);
         const args = { alphaTxn, betaTxn };
-        const callOpts = { sendParams: { populateAppCallResources: true, skipSending: !send } };
+        const callOpts = {
+            sendParams: {
+                populateAppCallResources: populate,
+                skipSending: !send,
+            },
+        };
 
         if (!send) opts.sender.signer = makeEmptyTransactionSigner();
         const poolClient = new PoolClient(opts, this.algod);
@@ -149,19 +186,31 @@ export class MyPool extends MySmartAsset {
     }
 
     async addLiquidity(tokenA: Token, tokenB: Token, assetAAmount: bigint, assetBAmount: bigint) {
-        const result = await this.addLiquidityHandler(tokenA, tokenB, assetAAmount, assetBAmount, true);
+        const result = await this.addLiquidityHandler(tokenA, tokenB, assetAAmount, assetBAmount, true, true);
         return result.return;
     }
 
-    async buildAddLiquidityTxns(tokenA: Token, tokenB: Token, assetAAmount: bigint, assetBAmount: bigint) {
-        const result = await this.addLiquidityHandler(tokenA, tokenB, assetAAmount, assetBAmount, false);
+    async buildAddLiquidityTxns(
+        tokenA: Token,
+        tokenB: Token,
+        assetAAmount: bigint,
+        assetBAmount: bigint,
+        populate: boolean
+    ) {
+        const result = await this.addLiquidityHandler(tokenA, tokenB, assetAAmount, assetBAmount, false, populate);
         return result.transactions;
     }
 
-    private async removeLiquidityHandler(lptAmount: bigint, send: boolean) {
-        const opts = { id: this.id, resolveBy: 'id' as const, sender: { ...this.signer } };
+    private async removeLiquidityHandler(lptAmount: bigint, send: boolean, populate: boolean) {
+        const opts = {
+            id: this.id,
+            resolveBy: 'id' as const,
+            sender: { ...this.signer },
+        };
         const args = { lptAmount: lptAmount };
-        const callOpts = { sendParams: { populateAppCallResources: true, skipSending: !send } };
+        const callOpts = {
+            sendParams: { populateAppCallResources: true, skipSending: !send },
+        };
 
         if (!send) opts.sender.signer = makeEmptyTransactionSigner();
         const poolClient = new PoolClient(opts, this.algod);
@@ -171,17 +220,30 @@ export class MyPool extends MySmartAsset {
     }
 
     async removeLiquidity(lptAmount: bigint) {
-        const result = await this.removeLiquidityHandler(lptAmount, true);
+        const result = await this.removeLiquidityHandler(lptAmount, true, true);
         return result.return;
     }
 
-    async buildRemoveLiquidityTxns(lptAmount: bigint) {
-        const result = await this.removeLiquidityHandler(lptAmount, false);
+    async buildRemoveLiquidityTxns(lptAmount: bigint, populate: boolean) {
+        const result = await this.removeLiquidityHandler(lptAmount, false, populate);
         return result.transactions;
     }
 
-    async swap(fromToken: Token, toToken: Token, fromAmount: bigint, toAmountMin: bigint, isDirectionAlphaToBeta: boolean) {
-        const finalTxns = await this.buildSwapTxns(fromToken, toToken, fromAmount, toAmountMin, isDirectionAlphaToBeta);
+    async swap(
+        fromToken: Token,
+        toToken: Token,
+        fromAmount: bigint,
+        toAmountMin: bigint,
+        isDirectionAlphaToBeta: boolean
+    ) {
+        const finalTxns = await this.buildSwapTxns(
+            fromToken,
+            toToken,
+            fromAmount,
+            toAmountMin,
+            isDirectionAlphaToBeta,
+            true
+        );
         const signed = await this.signer.signer(finalTxns, []);
 
         await this.algod.sendRawTransaction(signed).do();
@@ -193,7 +255,14 @@ export class MyPool extends MySmartAsset {
         }
     }
 
-    async buildSwapTxns(fromToken: Token, toToken: Token, fromAmount: bigint, toAmountMin: bigint, isDirectionAlphaToBeta: boolean): Promise<Transaction[]> {
+    async buildSwapTxns(
+        fromToken: Token,
+        toToken: Token,
+        fromAmount: bigint,
+        toAmountMin: bigint,
+        isDirectionAlphaToBeta: boolean,
+        populate: boolean
+    ): Promise<Transaction[]> {
         const poolClient = new PoolClient(
             {
                 id: this.id,
@@ -242,7 +311,9 @@ export class MyPool extends MySmartAsset {
             atc.addTransaction({ txn: txn, signer: mpt });
         }
         atc.buildGroup();
-        atc = await populateAppCallResources(atc, this.algod);
+        if (populate) {
+            atc = await populateAppCallResources(atc, this.algod);
+        }
         return atc.buildGroup().map(({ txn }) => txn);
     }
 }
