@@ -140,6 +140,7 @@ export class MyPool extends MySmartAsset {
                         to: getApplicationAddress(token.id),
                         amount: 28500,
                         suggestedParams: params,
+                        note: crypto.getRandomValues(new Uint8Array(4))
                     }),
                     (await client.arc200Transfer({ to: address, value: 0 }, { sendParams: { skipSending: true } }))
                         .transaction,
