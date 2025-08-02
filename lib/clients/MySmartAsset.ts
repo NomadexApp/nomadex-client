@@ -25,22 +25,24 @@ export class MySmartAsset {
 
     async arc200Symbol(): Promise<string> {
         const composer = this.assetClient.compose();
-        const { returns: [symbolBuffer] } = await composer.arc200Symbol({}).simulate({
+        const { methodResults: [result] } = await composer.arc200Symbol({}).simulate({
             allowMoreLogging: true,
             allowEmptySignatures: true,
             allowUnnamedResources: true
         });
+        const symbolBuffer = result.rawReturnValue;
         return Buffer.from(symbolBuffer).toString().replace(/\u0000/g, '');
     }
 
 
     async arc200Name(): Promise<string> {
         const composer = this.assetClient.compose();
-        const { returns: [nameBuffer] } = await composer.arc200Name({}).simulate({
+        const { methodResults: [result] } = await composer.arc200Name({}).simulate({
             allowMoreLogging: true,
             allowEmptySignatures: true,
             allowUnnamedResources: true
         });
+        const nameBuffer = result.rawReturnValue;
         return Buffer.from(nameBuffer).toString().replace(/\u0000/g, '');
     }
 
