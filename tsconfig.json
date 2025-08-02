@@ -6,7 +6,6 @@
 		"moduleResolution": "nodenext",
 		"outDir": "dist",
 		"declaration": true,
-		"declarationDir": "dist/types",
 		"declarationMap": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
