@@ -88,9 +88,9 @@ export class MySmartAsset {
     }
 
 
-    async arc200Allowance(spender: string, owner: string): Promise<bigint> {
+    async arc200Allowance(owner: string, spender: string): Promise<bigint> {
         const composer = this.assetClient.compose();
-        const { returns: [allowance] } = await composer.arc200Allowance({ spender, owner }).simulate({
+        const { returns: [allowance] } = await composer.arc200Allowance({ owner, spender }).simulate({
             allowMoreLogging: true,
             allowEmptySignatures: true,
             allowUnnamedResources: true
