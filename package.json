@@ -1,6 +1,6 @@
 {
   "name": "nomadex-client",
-  "version": "0.0.14",
+  "version": "0.0.15-beta-0",
   "description": "Client library to programmatically interact with https://voi.nomadex.app",
   "main": "dist/index.js",
   "module": "dist/index.js",
