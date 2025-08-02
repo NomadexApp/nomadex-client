@@ -38,14 +38,22 @@
     "email": "webdevalgo@gmail.com"
   },
   "license": "ISC",
-  "dependencies": {
-    "@algorandfoundation/algokit-utils": "^6.2.1"
-  },
   "devDependencies": {
+    "@algorandfoundation/algokit-utils": "^6.2.1",
     "@types/node": "^22.7.9",
+    "algosdk": "^2.11.0",
     "typescript": "^5.6.3"
   },
   "peerDependencies": {
-    "algosdk": "^2.9.0"
+    "@algorandfoundation/algokit-utils": ">=6.2.1",
+    "algosdk": ">=2.7.0"
+  },
+  "peerDependenciesMeta": {
+    "algosdk": {
+      "optional": true
+    },
+    "@algorandfoundation/algokit-utils": {
+      "optional": true
+    }
   }
 }
