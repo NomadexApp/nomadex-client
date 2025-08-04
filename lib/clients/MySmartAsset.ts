@@ -1,4 +1,4 @@
-import { Algodv2, encodeAddress, makeEmptyTransactionSigner } from "algosdk";
+import { Address, Algodv2, encodeAddress, makeEmptyTransactionSigner } from "algosdk";
 import { SmartAssetClient } from './SmartAssetClient'
 import type { TransactionSignerAccount } from "@algorandfoundation/algokit-utils/types/account";
 
@@ -11,7 +11,7 @@ export class MySmartAsset {
                 id: id,
                 resolveBy: 'id',
                 sender: signer ?? {
-                    addr: 'DYX2V5XF4IKOHE55Z63XAHVBJTMYM723HK5WJZ72BDZ5AFEFKJ5YP4DOQQ',
+                    addr: Address.fromString('DYX2V5XF4IKOHE55Z63XAHVBJTMYM723HK5WJZ72BDZ5AFEFKJ5YP4DOQQ'),
                     signer: makeEmptyTransactionSigner()
                 },
             },

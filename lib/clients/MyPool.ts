@@ -1,5 +1,6 @@
 import {
     ABIType,
+    Address,
     AtomicTransactionComposer,
     getApplicationAddress,
     makeAssetTransferTxnWithSuggestedParamsFromObject,
@@ -28,7 +29,7 @@ export class MyPool extends MySmartAsset {
     id: number;
     network: keyof typeof contracts;
     poolClient: PoolClient;
-    signer: { addr: string; signer: TransactionSigner };
+    signer: { addr: Address; signer: TransactionSigner };
     algod: Algodv2;
 
     constructor(id: number, network: keyof typeof contracts, nodeClient: Algodv2, signer?: TransactionSignerAccount) {
@@ -39,7 +40,7 @@ export class MyPool extends MySmartAsset {
                 id: id,
                 resolveBy: 'id',
                 sender: signer ?? {
-                    addr: 'DYX2V5XF4IKOHE55Z63XAHVBJTMYM723HK5WJZ72BDZ5AFEFKJ5YP4DOQQ',
+                    addr: Address.fromString('DYX2V5XF4IKOHE55Z63XAHVBJTMYM723HK5WJZ72BDZ5AFEFKJ5YP4DOQQ'),
                     signer: makeEmptyTransactionSigner(),
                 },
             },
@@ -53,16 +54,16 @@ export class MyPool extends MySmartAsset {
     async buildDepositTxn(token: { id: number; type: number }, amount: bigint) {
         if (token.type === 0) {
             return makePaymentTxnWithSuggestedParamsFromObject({
-                from: this.signer.addr,
-                to: getApplicationAddress(this.id),
+                sender: this.signer.addr,
+                receiver: getApplicationAddress(this.id),
                 amount: amount,
                 suggestedParams: await this.algod.getTransactionParams().do(),
             });
         } else if (token.type === 1) {
             return makeAssetTransferTxnWithSuggestedParamsFromObject({
                 assetIndex: token.id,
-                from: this.signer.addr,
-                to: getApplicationAddress(this.id),
+                sender: this.signer.addr,
+                receiver: getApplicationAddress(this.id),
                 amount: amount,
                 suggestedParams: await this.algod.getTransactionParams().do(),
             });
@@ -77,7 +78,7 @@ export class MyPool extends MySmartAsset {
             );
             const { transaction } = await smartAssetClient.arc200Transfer(
                 {
-                    to: getApplicationAddress(this.id),
+                    to: getApplicationAddress(this.id).toString(),
                     value: amount,
                 },
                 {
@@ -111,8 +112,8 @@ export class MyPool extends MySmartAsset {
                 txns.push(
                     makeAssetTransferTxnWithSuggestedParamsFromObject({
                         assetIndex: token.id,
-                        from: this.signer.addr,
-                        to: this.signer.addr,
+                        sender: this.signer.addr.toString(),
+                        receiver: this.signer.addr.toString(),
                         amount: 0,
                         suggestedParams: params,
                     })
@@ -120,8 +121,8 @@ export class MyPool extends MySmartAsset {
             }
         } else if (token.type === TokenType.SMART) {
             const factoryAddress = getApplicationAddress(contracts[this.network].poolFcatory);
-            const factoryBalance = await MySmartAsset.from(token.id, this.algod).arc200BalanceOf(factoryAddress);
-            const userBalance = await MySmartAsset.from(token.id, this.algod).arc200BalanceOf(this.signer.addr);
+            const factoryBalance = await MySmartAsset.from(token.id, this.algod).arc200BalanceOf(factoryAddress.toString());
+            const userBalance = await MySmartAsset.from(token.id, this.algod).arc200BalanceOf(this.signer.addr.toString());
             const getTxns = async (address: string) => {
                 const client = new SmartAssetClient(
                     {
@@ -136,8 +137,8 @@ export class MyPool extends MySmartAsset {
                 );
                 return [
                     makePaymentTxnWithSuggestedParamsFromObject({
-                        from: this.signer.addr,
-                        to: getApplicationAddress(token.id),
+                        sender: this.signer.addr,
+                        receiver: getApplicationAddress(token.id),
                         amount: 28500,
                         suggestedParams: params,
                         note: crypto.getRandomValues(new Uint8Array(4))
@@ -147,10 +148,10 @@ export class MyPool extends MySmartAsset {
                 ];
             };
             if (factoryBalance < 1n) {
-                txns.push(...(await getTxns(factoryAddress)));
+                txns.push(...(await getTxns(factoryAddress.toString())));
             }
             if (userBalance < 1n) {
-                txns.push(...(await getTxns(this.signer.addr)));
+                txns.push(...(await getTxns(this.signer.addr.toString())));
             }
         }
         return txns;
@@ -248,7 +249,7 @@ export class MyPool extends MySmartAsset {
         const signed = await this.signer.signer(finalTxns, []);
 
         await this.algod.sendRawTransaction(signed).do();
-        const result = await waitForConfirmation(this.algod, finalTxns.at(-1)?.txID() ?? '', 3);
+        const result = await waitForConfirmation(this.algod, finalTxns[finalTxns.length - 1]?.txID() ?? '', 3);
 
         const log: Uint8Array = result.logs.find((log: Uint8Array) => log.length === 36);
         if (log) {
