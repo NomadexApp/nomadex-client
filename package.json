@@ -1,6 +1,6 @@
 {
   "name": "nomadex-client",
-  "version": "0.0.16-beta-2",
+  "version": "0.0.16-beta-3",
   "description": "Client library to programmatically interact with https://voi.nomadex.app",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -39,9 +39,7 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "@algorandfoundation/algokit-utils": "^9.1.2",
     "@types/node": "^24.1.0",
-    "algosdk": "^3.3.1",
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
